@@ -9,6 +9,9 @@
 #ifndef ESTIMATOR_BASE_H
 #define ESTIMATOR_BASE_H
 
+using namespace std;
+
+
 #include <ros/ros.h>
 #include <rosplane_msgs/State.h>
 #include <rosflight_msgs/GPS.h>
@@ -18,8 +21,11 @@
 #include <rosflight_msgs/Status.h>
 #include <math.h>
 #include <Eigen/Eigen>
+#include <numeric>
 
 #define EARTH_RADIUS 6378145.0f
+
+
 
 namespace rosplane
 {
