@@ -137,10 +137,13 @@ void controller_base::actuator_controls_publish(const ros::TimerEvent&)
     {
         if(!_controller_commands.aux_valid)
         {
+            // run control loops as normal if aux commands aren't active
             control(_params, input, output);
         }
         else
         {
+            // if roll, pitch or rudder are directly controlled,
+            // run tuning routine instead of normal control loops
             struct tuning_input_s tuning_input;
             tuning_input.mode = static_cast<enum tuning_modes>(_controller_commands.aux_state);
             tuning_input.theta_c = _controller_commands.aux[0];

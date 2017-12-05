@@ -17,16 +17,19 @@ controller_example::controller_example() : controller_base()
 
 void controller_example::control(const params_s &params, const input_s &input, output_s &output)
 {
+    // rudder control is currently not implemented
     output.delta_r = 0; //cooridinated_turn_hold(input.beta, params, input.Ts)
     output.phi_c = course_hold(input.chi_c, input.chi, input.phi_ff, input.r, params, input.Ts);
     output.delta_a = roll_hold(output.phi_c, input.phi, input.p, params, input.Ts);
 
+    // Commanded throttle and pitch are controlled differently depending on altitude zone
     switch(current_zone) {
     case alt_zones::TakeOff:
         output.phi_c = 0;
         output.delta_a = roll_hold(0.0, input.phi, input.p, params, input.Ts);
-        output.delta_t = params.max_t;
-        output.theta_c = 15*3.14/180;
+        output.delta_t = params.max_t;  // full throttle
+        output.theta_c = 15*3.14/180;   // 15 degree takeoff angle
+        // if current altitude is above take off zone, change to climb zone
         if(input.h >= params.alt_toz) {
 //            ROS_INFO("climb");
             current_zone = alt_zones::Climb;
@@ -38,6 +41,7 @@ void controller_example::control(const params_s &params, const input_s &input, o
     case alt_zones::Climb:
         output.delta_t = params.max_t;
         output.theta_c = airspeed_with_pitch_hold(input.Va_c, input.va, params, input.Ts);
+        // switch to altitude hold when within alt_hz of commanded altitude:
         if(input.h >= input.h_c - params.alt_hz) {
 //            ROS_INFO("hold");
             current_zone = alt_zones::AltitudeHold;
@@ -55,6 +59,7 @@ void controller_example::control(const params_s &params, const input_s &input, o
     case alt_zones::Descend:
         output.delta_t = 0;
         output.theta_c = airspeed_with_pitch_hold(input.Va_c, input.va, params, input.Ts);
+        // switch to altitude hold when within alt_hz of commanded altitude:
         if(input.h <= input.h_c + params.alt_hz)
         {
 //            ROS_INFO("hold");
@@ -70,6 +75,7 @@ void controller_example::control(const params_s &params, const input_s &input, o
     case alt_zones::AltitudeHold:
         output.delta_t = airspeed_with_throttle_hold(input.Va_c, input.va, params, input.Ts);
         output.theta_c = altitiude_hold(input.h_c, input.h, params, input.Ts);
+        // enter climb or descend modes if altitude is outside the hold zone:
         if(input.h >= input.h_c + params.alt_hz) {
 //            ROS_INFO("desend");
             current_zone = alt_zones::Descend;
@@ -97,7 +103,7 @@ void controller_example::tune(const params_s &params, const input_s &input, cons
     switch(tuning_input.mode) {
         case tuning_modes::Roll:
             output.phi_c = tuning_input.phi_c;
-            output.theta_c = tuning_input.theta_c;
+            output.theta_c = tuning_input.theta_c;  // why use this in roll tuning, shouldn't it be altitude hold loop?
             output.delta_a = roll_hold(tuning_input.phi_c, input.phi, input.p, params, input.Ts);
             output.delta_e = pitch_hold(tuning_input.theta_c, input.theta, input.q, params, input.Ts);
             //output.delta_t = 0.6f;
