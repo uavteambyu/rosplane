@@ -9,9 +9,6 @@
 #ifndef ESTIMATOR_BASE_H
 #define ESTIMATOR_BASE_H
 
-using namespace std;
-
-
 #include <ros/ros.h>
 #include <rosplane_msgs/State.h>
 #include <rosflight_msgs/GPS.h>
