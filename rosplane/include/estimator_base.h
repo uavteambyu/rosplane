@@ -22,8 +22,6 @@
 
 #define EARTH_RADIUS 6378145.0f
 
-
-
 namespace rosplane
 {
 
