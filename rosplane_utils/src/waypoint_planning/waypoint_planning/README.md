@@ -19,4 +19,4 @@ and edited using the text boxes below, but will not be executed by the
 plane until sent to the waypoint list.
 
 Finally, waypoint lists from the left column can be saved and loaded
-for later use using the corresponding buttons. 
+for later use using the corresponding buttons.

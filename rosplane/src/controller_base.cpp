@@ -9,6 +9,7 @@ controller_base::controller_base():
 {
     _vehicle_state_sub = nh_.subscribe("state", 10, &controller_base::vehicle_state_callback, this);
     _controller_commands_sub = nh_.subscribe("controller_commands", 10, &controller_base::controller_commands_callback, this);
+    _bomb_drop_commands = nh_.subscribe("bomb_command", 1, &controller_base::bomb_drop_command_callback,this);
 
     memset(&_vehicle_state, 0, sizeof(_vehicle_state));
     memset(&_controller_commands, 0, sizeof(_controller_commands));
@@ -58,6 +59,7 @@ controller_base::controller_base():
     _act_pub_timer = nh_.createTimer(ros::Duration(1.0/100.0), &controller_base::actuator_controls_publish, this);
 
     _command_recieved = false;
+    bomb_drop = 0;
 }
 
 void controller_base::vehicle_state_callback(const rosplane_msgs::StateConstPtr& msg)
@@ -69,6 +71,9 @@ void controller_base::controller_commands_callback(const rosplane_msgs::Controll
 {
     _command_recieved = true;
     _controller_commands = *msg;
+}
+void controller_base::bomb_drop_command_callback(const rosflight_msgs::Command& msg){
+    bomb_drop = msg.bomb_drop;
 }
 
 void controller_base::reconfigure_callback(rosplane::ControllerConfig &config, uint32_t level)
@@ -164,7 +169,7 @@ void controller_base::actuator_controls_publish(const ros::TimerEvent&)
         actuators.y = output.delta_e;//(isfinite(output.delta_e)) ? output.delta_e : 0.0f;
         actuators.z = output.delta_r;//(isfinite(output.delta_r)) ? output.delta_r : 0.0f;
         actuators.F = output.delta_t;//(isfinite(output.delta_t)) ? output.delta_t : 0.0f;
-
+        actuators.bomb_drop = bomb_drop;
         _actuators_pub.publish(actuators);
 
         if(_internals_pub.getNumSubscribers() > 0)

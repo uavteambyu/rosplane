@@ -123,6 +123,7 @@ private:
     ros::NodeHandle nh_private_;
     ros::Subscriber _vehicle_state_sub;
     ros::Subscriber _controller_commands_sub;
+    ros::Subscriber _bomb_drop_commands;
     ros::Publisher _actuators_pub;
     ros::Publisher _internals_pub;
     ros::Timer _act_pub_timer;
@@ -131,9 +132,11 @@ private:
     rosplane_msgs::Controller_Commands _controller_commands;
     rosplane_msgs::State _vehicle_state;
 
+    void bomb_drop_command_callback(const rosflight_msgs::Command& msg);
     void vehicle_state_callback(const rosplane_msgs::StateConstPtr& msg);
     void controller_commands_callback(const rosplane_msgs::Controller_CommandsConstPtr& msg);
     bool _command_recieved;
+    float bomb_drop;
 
     dynamic_reconfigure::Server<rosplane::ControllerConfig> _server;
     dynamic_reconfigure::Server<rosplane::ControllerConfig>::CallbackType _func;
